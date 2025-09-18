@@ -15,6 +15,7 @@ import {
   updateFromRaindrop
 } from '../lib/notion.js';
 
+
 // --- helpers ---
 function getQP(q: Record<string, string | string[] | undefined>, key: string) {
   const v = q[key];
@@ -47,8 +48,28 @@ function envInt(name: string, def: number) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  try {
-    const RAINDROP_COLLECTION_ID = process.env.RAINDROP_COLLECTION_ID!;
+    // Allow POST (Notion button) or GET (cron/manual)
+    if (req.method !== 'POST' && req.method !== 'GET') {
+        return res.status(405).json({ ok: false, error: 'method not allowed' });
+    }
+    
+    // Vercel cron requests include this header
+    const isCron = req.headers['x-vercel-cron'] === '1';
+    
+    // Require token only for POSTs that are NOT cron
+    const requireToken = req.method === 'POST' && !isCron;
+    
+    if (requireToken && process.env.TRIGGER_TOKEN) {
+        const headerToken = req.headers['x-webhook-token'] as string | undefined;
+        const queryToken =
+        typeof req.query.token === 'string' ? req.query.token : undefined;
+        const token = headerToken ?? queryToken;
+        if (token !== process.env.TRIGGER_TOKEN) {
+        return res.status(401).json({ ok: false, error: 'unauthorized' });
+        }
+    }
+    try {
+        const RAINDROP_COLLECTION_ID = process.env.RAINDROP_COLLECTION_ID!;
     if (!RAINDROP_COLLECTION_ID) throw new Error('Missing RAINDROP_COLLECTION_ID');
 
     // debug knobs (still supported)
