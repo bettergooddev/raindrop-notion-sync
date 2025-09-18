@@ -3,17 +3,20 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "@notionhq/client": "^2.2.14"
+    "@notionhq/client": "^2.2.14",
+    "dotenv": "^17.2.2"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
+    "@vercel/node": "^5.3.22",
     "typescript": "^5.5.4",
     "vercel": "^34.2.0"
   },
   "scripts": {
-    "local": "vercel dev",        
-    "build": "echo \"no build step\""
+    "local": "vercel dev"
   }
 }
